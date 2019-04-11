@@ -6,9 +6,9 @@
 
 package kotlinx.serialization
 
-import kotlinx.serialization.internal.*
+import kotlinx.serialization.internal.SerialClassDescImpl
 import kotlinx.serialization.modules.*
-import kotlin.reflect.*
+import kotlin.reflect.KClass
 
 /**
  * This class provides support for retrieving a serializer in runtime, instead of using the one precompiled by the serialization plugin.
@@ -25,7 +25,9 @@ import kotlin.reflect.*
  */
 @ImplicitReflectionSerializer
 public class ContextSerializer<T : Any>(private val serializableClass: KClass<T>) : KSerializer<T> {
-    public override val descriptor: SerialDescriptor = object : SerialClassDescImpl("CONTEXT") {} // todo: remove this crutch
+    public override val descriptor: SerialDescriptor = object : SerialClassDescImpl(serializableClass.simpleName ?: "") {
+        override val kind: SerialKind = UnionKind.CONTEXT
+    }
 
     public override fun serialize(encoder: Encoder, obj: T) {
         val s = encoder.context.getContextualOrDefault(obj)

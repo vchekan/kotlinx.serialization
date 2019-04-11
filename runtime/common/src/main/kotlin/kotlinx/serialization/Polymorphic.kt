@@ -6,8 +6,9 @@
 
 package kotlinx.serialization
 
-import kotlinx.serialization.modules.*
 import kotlinx.serialization.internal.SerialClassDescImpl
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.SerializersModuleBuilder
 import kotlin.reflect.KClass
 
 /**
@@ -16,7 +17,8 @@ import kotlin.reflect.KClass
  * Currently, it has no guarantees neither on its reference transparency nor its
  * [elementDescriptors], only on [kind].
  */
-public object PolymorphicClassDescriptor : SerialClassDescImpl("kotlin.Any") {
+public class PolymorphicClassDescriptor internal constructor(baseClass: KClass<*>) :
+    SerialClassDescImpl(baseClass.simpleName ?: "") {
     public override val kind: SerialKind = UnionKind.POLYMORPHIC
 
     init {
@@ -81,7 +83,7 @@ public object PolymorphicClassDescriptor : SerialClassDescImpl("kotlin.Any") {
  * @see SerializersModuleBuilder.polymorphic
  */
 public class PolymorphicSerializer<T : Any>(private val baseClass: KClass<T>) : KSerializer<Any> {
-    public override val descriptor: SerialDescriptor = PolymorphicClassDescriptor
+    public override val descriptor: SerialDescriptor = PolymorphicClassDescriptor(baseClass)
 
     @Suppress("UNCHECKED_CAST")
     public override fun serialize(encoder: Encoder, obj: Any) {
