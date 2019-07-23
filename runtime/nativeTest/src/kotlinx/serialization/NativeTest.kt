@@ -1,7 +1,5 @@
 package kotlinx.serialization
 
-import kotlinx.io.*
-import kotlinx.serialization.internal.*
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.protobuf.ProtoBuf
@@ -48,5 +46,10 @@ class CommonTest {
         val id2 = getSerialId(country.descriptor, 0)
         assertEquals(10, id1)
         assertEquals(10, id2)
+    }
+
+    @Test
+    fun failMe() {
+        fail("FAIL!!")
     }
 }
