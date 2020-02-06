@@ -35,7 +35,7 @@ public interface SerialModule {
     public fun <T : Any> getPolymorphic(baseClass: KClass<T>, value: T): KSerializer<out T>?
 
     /**
-     * Returns a polymorphic serializer registered for for a [serializedClassName] in the scope of [baseClass].
+     * Returns a polymorphic serializer registered for a [serializedClassName] in the scope of [baseClass].
      */
     public fun <T : Any> getPolymorphic(baseClass: KClass<T>, serializedClassName: String): KSerializer<out T>?
 
