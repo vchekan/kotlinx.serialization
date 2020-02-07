@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2017-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
  */
 
 package kotlinx.serialization.protobuf
@@ -17,6 +17,7 @@ public annotation class ProtoType(val type: ProtoNumberType)
 internal typealias ProtoDesc = Pair<Int, ProtoNumberType>
 
 internal fun extractParameters(descriptor: SerialDescriptor, index: Int, zeroBasedDefault: Boolean = false): ProtoDesc {
+    if (descriptor.kind is PolymorphicKind) return (if (zeroBasedDefault) index else index + 1) to ProtoNumberType.DEFAULT
     val idx = getProtoId(descriptor, index) ?: (if (zeroBasedDefault) index else index + 1)
     val format = descriptor.findAnnotation<ProtoType>(index)?.type
             ?: ProtoNumberType.DEFAULT

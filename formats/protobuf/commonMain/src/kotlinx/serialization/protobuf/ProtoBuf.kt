@@ -234,14 +234,16 @@ class ProtoBuf(
             get() = this@ProtoBuf.context
 
         private val indexByTag: MutableMap<Int, Int> = mutableMapOf()
-        private fun findIndexByTag(desc: SerialDescriptor, serialId: Int, zeroBasedDefault: Boolean = false): Int =
-            (0 until desc.elementsCount).firstOrNull {
+        private fun findIndexByTag(desc: SerialDescriptor, serialId: Int, zeroBasedDefault: Boolean = false): Int {
+            if (desc.kind is PolymorphicKind) return serialId - 1
+            return (0 until desc.elementsCount).firstOrNull {
                 extractParameters(
                     desc,
                     it,
                     zeroBasedDefault
                 ).first == serialId
             } ?: -1
+        }
 
         override fun beginStructure(descriptor: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder =
             when (descriptor.kind) {
