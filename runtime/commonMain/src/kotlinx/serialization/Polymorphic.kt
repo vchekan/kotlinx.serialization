@@ -9,15 +9,15 @@ import kotlinx.serialization.modules.*
 import kotlin.reflect.*
 
 @Deprecated(
-    message = "Top-level polymorphic descriptor is deprecated, use descriptor from the instance of PolymorphicSerializer or" +
-            "check for descriptor kind instead", level = DeprecationLevel.WARNING
+    message = "Top-level polymorphic descriptor is deprecated, use ContextAwareDescriptor descriptor from the instance of PolymorphicSerializer or" +
+            "check for descriptor kind instead", level = DeprecationLevel.ERROR
 )
-public val PolymorphicClassDescriptor = SerialDescriptor("kotlinx.serialization.Polymorphic", PolymorphicKind.OPEN) {
-    // TODO annotations and polymorphic implementation
-    element("name", StringSerializer.descriptor)
-    val valueDescriptor = SerialDescriptor("value", UnionKind.CONTEXTUAL)
-    element("value", valueDescriptor)
-}
+public val PolymorphicClassDescriptor: SerialDescriptor =
+    SerialDescriptor("kotlinx.serialization.Polymorphic", PolymorphicKind.OPEN) {
+        element("name", StringSerializer.descriptor)
+        val valueDescriptor = SerialDescriptor("value", UnionKind.CONTEXTUAL)
+        element("value", valueDescriptor)
+    }.withContext(Any::class)
 
 /**
  * This class provides support for multiplatform polymorphic serialization for interfaces and abstract classes.
@@ -74,5 +74,6 @@ public val PolymorphicClassDescriptor = SerialDescriptor("kotlinx.serialization.
  * @see SerializersModuleBuilder.polymorphic
  */
 public class PolymorphicSerializer<T : Any>(override val baseClass: KClass<T>) : AbstractPolymorphicSerializer<T>() {
-    public override val descriptor: SerialDescriptor = PolymorphicClassDescriptor
+    public override val descriptor: ContextAwareDescriptor =
+        SerialDescriptor("kotlinx.serialization.Polymorphic", PolymorphicKind.OPEN).withContext(baseClass)
 }

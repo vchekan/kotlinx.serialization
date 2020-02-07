@@ -4,6 +4,10 @@
 
 package kotlinx.serialization
 
+import kotlinx.serialization.PrimitiveKind.*
+import kotlinx.serialization.StructureKind.*
+import kotlinx.serialization.modules.*
+
 /**
  * Serial kind is an intrinsic property of [SerialDescriptor] that indicates how
  * the corresponding type is structurally represented by its serializer.
@@ -223,6 +227,9 @@ public sealed class UnionKind : SerialKind() {
      * Represents an "unknown" type that will be known only at the moment of the serialization.
      * Effectively it defers the choice of the serializer to a moment of the serialization, and can
      * be used for [contextual][ContextualSerialization] serialization.
+     *
+     * To introspect such a descriptor correctly, one may need a [SerialModule].
+     * See [ContextAwareDescriptor] for more details.
      */
     public object CONTEXTUAL : UnionKind()
 
@@ -257,6 +264,9 @@ public sealed class PolymorphicKind : UnionKind() {
      * Due to security concerns and typical mistakes that arises from polymorphic serialization, by default
      * `kotlinx.serialization` provides only bounded polymorphic serialization, forcing users to register all possible
      * serializers for a given base class or interface.
+     *
+     * To introspect such a descriptor (e.g. list possible subclasses) correctly, one may need a [SerialModule].
+     * See [ContextAwareDescriptor] for more details.
      */
     public object OPEN : PolymorphicKind()
 }

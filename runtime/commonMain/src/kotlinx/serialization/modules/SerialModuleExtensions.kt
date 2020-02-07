@@ -7,7 +7,7 @@
 package kotlinx.serialization.modules
 
 import kotlinx.serialization.*
-import kotlin.reflect.KClass
+import kotlin.reflect.*
 
 /**
  * Returns a dependent serializer associated with a given reified type.
@@ -62,4 +62,42 @@ public infix fun SerialModule.overwriteWith(other: SerialModule): SerialModule =
             registerPolymorphicSerializer(baseClass, actualClass, actualSerializer, allowOverwrite = true)
         }
     })
+}
+
+/**
+ * Looks up a descriptor of serializer registered for contextual serialization in [this],
+ * using [ContextAwareDescriptor.kClass] of [descriptor] as a key.
+ *
+ * @see SerialModule.getContextual
+ * @see SerializersModuleBuilder.contextual
+ */
+public fun SerialModule.getContextualDescriptor(descriptor: ContextAwareDescriptor): SerialDescriptor? =
+    getContextual(descriptor.kClass)?.descriptor
+
+/**
+ * Retrieves a collection of descriptors which serializers are registered for polymorphic serialization in [this]
+ * with base class equal to [descriptor]'s [ContextAwareDescriptor.kClass].
+ *
+ * @see SerialModule.getPolymorphic
+ * @see SerializersModuleBuilder.polymorphic
+ */
+public fun SerialModule.getPolymorphicDescriptors(descriptor: ContextAwareDescriptor): List<SerialDescriptor> {
+    // shortcut
+    if (this is SerialModuleImpl) return this.polyBase2Serializers[descriptor.kClass]?.values.orEmpty()
+        .map { it.descriptor }
+
+    val builder = ArrayList<SerialDescriptor>()
+    dumpTo(object : SerialModuleCollector {
+        override fun <T : Any> contextual(kClass: KClass<T>, serializer: KSerializer<T>) { /*noop*/
+        }
+
+        override fun <Base : Any, Sub : Base> polymorphic(
+            baseClass: KClass<Base>,
+            actualClass: KClass<Sub>,
+            actualSerializer: KSerializer<Sub>
+        ) {
+            if (baseClass == descriptor.kClass) builder.add(actualSerializer.descriptor)
+        }
+    })
+    return builder
 }

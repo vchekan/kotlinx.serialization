@@ -23,6 +23,7 @@ class ContextAndPolymorphicTest {
     )
 
     @Serializable
+    @SerialName("Payload")
     data class Payload(val s: String)
 
     @Serializable
@@ -32,9 +33,7 @@ class ContextAndPolymorphicTest {
     object PayloadSerializer {}
 
     object BinaryPayloadSerializer : KSerializer<Payload> {
-        override val descriptor: SerialDescriptor = SerialDescriptor("Payload") {
-            element<String>("s")
-        }
+        override val descriptor: SerialDescriptor = PrimitiveDescriptor("BinaryPayload", PrimitiveKind.STRING)
 
         override fun serialize(encoder: Encoder, value: Payload) {
             encoder.encodeString(InternalHexConverter.printHexBinary(value.s.toUtf8Bytes()))
@@ -81,7 +80,7 @@ class ContextAndPolymorphicTest {
         val map = mapOf<String, Any>("Payload" to Payload("data"))
         val serializer = (StringSerializer to PolymorphicSerializer(Any::class)).map
         val s = json.stringify(serializer, map)
-        assertEquals("""{Payload:[kotlinx.serialization.features.ContextAndPolymorphicTest.Payload,{s:data}]}""", s)
+        assertEquals("""{Payload:[Payload,{s:data}]}""", s)
     }
 
     @Test
@@ -98,5 +97,29 @@ class ContextAndPolymorphicTest {
         val list = PayloadList(listOf(Payload("string")))
         assertEquals("""{"ps":[{"s":"string"}]}""", json1.stringify(PayloadList.serializer(), list))
         assertEquals("""{"ps":["737472696E67"]}""", json2.stringify(PayloadList.serializer(), list))
+    }
+
+    private fun SerialDescriptor.inContext(module: SerialModule): SerialDescriptor = when (kind) {
+        UnionKind.CONTEXTUAL -> requireNotNull(module.getContextualDescriptor(this as ContextAwareDescriptor)) { "Expected $this to be registered in module" }
+        else -> error("Expected this function to be called on CONTEXTUAL descriptor")
+    }
+
+    @Test
+    fun testResolveContextualDescriptor() {
+        val simpleModule = serializersModule(PayloadSerializer)
+        val binaryModule = serializersModule(BinaryPayloadSerializer)
+
+        val contextDesc = EnhancedData.serializer().descriptor.elementDescriptors()[1] // @ContextualSer stringPayload
+        assertEquals(UnionKind.CONTEXTUAL, contextDesc.kind)
+        assertEquals(0, contextDesc.elementsCount)
+
+        val resolvedToDefault = contextDesc.inContext(simpleModule)
+        assertEquals(StructureKind.CLASS, resolvedToDefault.kind)
+        assertEquals("Payload", resolvedToDefault.serialName)
+        assertEquals(1, resolvedToDefault.elementsCount)
+
+        val resolvedToBinary = contextDesc.inContext(binaryModule)
+        assertEquals(PrimitiveKind.STRING, resolvedToBinary.kind)
+        assertEquals("BinaryPayload", resolvedToBinary.serialName)
     }
 }
