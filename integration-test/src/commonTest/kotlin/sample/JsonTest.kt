@@ -65,7 +65,7 @@ class JsonTest {
     @Test
     fun descriptorsSchemaIsCorrect() {
         val desc = Holder.serializer().descriptor
-        assertSame(PolymorphicClassDescriptor, desc.getElementDescriptor(0))
+        assertEquals(PolymorphicSerializer(IMessage::class).descriptor, desc.getElementDescriptor(0))
     }
 
     @Test
