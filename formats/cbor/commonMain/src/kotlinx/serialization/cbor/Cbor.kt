@@ -369,15 +369,15 @@ class Cbor(val updateMode: UpdateMode = UpdateMode.BANNED, val encodeDefaults: B
 
         val plain = Cbor()
 
-        override fun <T> dump(serializer: SerializationStrategy<T>, obj: T): ByteArray = plain.dump(serializer, obj)
+        override fun <T> dump(serializer: SerializationStrategy<T>, value: T): ByteArray = plain.dump(serializer, value)
         override fun <T> load(deserializer: DeserializationStrategy<T>, bytes: ByteArray): T = plain.load(deserializer, bytes)
         override val context: SerialModule get() = plain.context
     }
 
-    override fun <T> dump(serializer: SerializationStrategy<T>, obj: T): ByteArray {
+    override fun <T> dump(serializer: SerializationStrategy<T>, value: T): ByteArray {
         val output = ByteArrayOutputStream()
         val dumper = CborWriter(CborEncoder(output))
-        dumper.encode(serializer, obj)
+        dumper.encode(serializer, value)
         return output.toByteArray()
     }
 
