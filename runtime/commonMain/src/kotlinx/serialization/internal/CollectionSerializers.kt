@@ -26,7 +26,7 @@ sealed class AbstractCollectionSerializer<Element, Collection, Builder> : KSeria
     final override fun patch(decoder: Decoder, old: Collection): Collection {
         val builder = old.toBuilder()
         val startIndex = builder.builderSize()
-        val compositeDecoder = decoder.beginStructure(descriptor, *typeParams)
+        val compositeDecoder = decoder.beginStructure(descriptor)
         if (compositeDecoder.decodeSequentially()) {
             readAll(compositeDecoder, builder, startIndex, readSize(compositeDecoder, builder))
         } else {
@@ -68,7 +68,7 @@ sealed class ListLikeSerializer<Element, Collection, Builder>(
     override fun serialize(encoder: Encoder, value: Collection) {
         val size = value.collectionSize()
         @Suppress("NAME_SHADOWING")
-        val encoder = encoder.beginCollection(descriptor, size, *typeParams)
+        val encoder = encoder.beginCollection(descriptor, size)
         val iterator = value.collectionIterator()
         for (index in 0 until size)
             encoder.encodeSerializableElement(descriptor, index, elementSerializer, iterator.next())
@@ -122,7 +122,7 @@ sealed class MapLikeSerializer<Key, Value, Collection, Builder : MutableMap<Key,
     override fun serialize(encoder: Encoder, value: Collection) {
         val size = value.collectionSize()
         @Suppress("NAME_SHADOWING")
-        val encoder = encoder.beginCollection(descriptor, size, *typeParams)
+        val encoder = encoder.beginCollection(descriptor, size)
         val iterator = value.collectionIterator()
         var index = 0
         iterator.forEach { (k, v) ->
@@ -179,7 +179,7 @@ internal constructor(
     final override fun serialize(encoder: Encoder, value: Array) {
         val size = value.collectionSize()
         @Suppress("NAME_SHADOWING")
-        val encoder = encoder.beginCollection(descriptor, size, *typeParams)
+        val encoder = encoder.beginCollection(descriptor, size)
         writeContent(encoder, value, size)
         encoder.endStructure(descriptor)
     }
