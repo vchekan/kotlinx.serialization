@@ -1,13 +1,13 @@
 /*
- * Copyright 2017-2019 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2017-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
  */
 
 package kotlinx.serialization.json.internal
 
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
-import kotlinx.serialization.modules.SerialModule
-import kotlin.jvm.JvmField
+import kotlinx.serialization.modules.*
+import kotlin.jvm.*
 
 
 internal class StreamingJsonOutput(private val composer: Composer, override val json: Json, private val mode: WriteMode,
@@ -53,7 +53,7 @@ internal class StreamingJsonOutput(private val composer: Composer, override val 
         encodeString(descriptor.serialName)
     }
 
-    override fun beginStructure(descriptor: SerialDescriptor, vararg typeSerializers: KSerializer<*>): CompositeEncoder {
+    override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
         val newMode = json.switchMode(descriptor)
         if (newMode.begin != INVALID) { // entry
             composer.print(newMode.begin)

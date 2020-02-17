@@ -7,7 +7,7 @@ package kotlinx.serialization.json.internal
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 import kotlinx.serialization.modules.*
-import kotlin.jvm.JvmField
+import kotlin.jvm.*
 
 /**
  * [JsonInput] which reads given JSON from [JsonReader] field by field.
@@ -21,21 +21,17 @@ internal class StreamingJsonInput internal constructor(
     public override val context: SerialModule = json.context
     private var currentIndex = -1
     private val configuration = json.configuration
-    
-    public override fun decodeJson(): JsonElement = JsonParser(reader).read()
 
-    @Suppress("DEPRECATION")
-    override val updateMode: UpdateMode
-        get() = configuration.updateMode
+    public override fun decodeJson(): JsonElement = JsonParser(reader).read()
 
     override fun <T> decodeSerializableValue(deserializer: DeserializationStrategy<T>): T {
         return decodeSerializableValuePolymorphic(deserializer)
     }
 
-    override fun beginStructure(desc: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder {
-        val newMode = json.switchMode(desc)
+    override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {
+        val newMode = json.switchMode(descriptor)
         if (newMode.begin != INVALID) {
-            reader.requireTokenClass(newMode.beginTc) { "Expected '${newMode.begin}, kind: ${desc.kind}'" }
+            reader.requireTokenClass(newMode.beginTc) { "Expected '${newMode.begin}, kind: ${descriptor.kind}'" }
             reader.nextToken()
         }
         return when (newMode) {

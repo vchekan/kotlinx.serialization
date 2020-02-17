@@ -112,7 +112,7 @@ sealed class MapLikeSerializer<Key, Value, Collection, Builder : MutableMap<Key,
             index + 1
         }
         val value: Value = if (builder.containsKey(key) && valueSerializer.descriptor.kind !is PrimitiveKind) {
-            decoder.updateSerializableElement(descriptor, vIndex, valueSerializer, builder.getValue(key))
+            decoder.decodeSerializableElement(descriptor, vIndex, valueSerializer, builder.getValue(key))
         } else {
             decoder.decodeSerializableElement(descriptor, vIndex, valueSerializer)
         }

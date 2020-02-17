@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2017-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
  */
 
 package kotlinx.serialization
@@ -78,7 +78,13 @@ abstract class TaggedEncoder<Tag : Any?> : Encoder, CompositeEncoder {
         index: Int
     ) = encodeTaggedEnum(popTag(), enumDescriptor, index)
 
-    override fun beginStructure(descriptor: SerialDescriptor, vararg typeSerializers: KSerializer<*>): CompositeEncoder {
+    // do not update signature here because new signature is called by the plugin;
+    // and clients that have old signature would not be called.
+    @Suppress("OverridingDeprecatedMember")
+    override fun beginStructure(
+        descriptor: SerialDescriptor,
+        vararg typeSerializers: KSerializer<*>
+    ): CompositeEncoder {
         return this
     }
 
@@ -92,23 +98,52 @@ abstract class TaggedEncoder<Tag : Any?> : Encoder, CompositeEncoder {
     open fun endEncode(descriptor: SerialDescriptor) {}
 
     @Suppress("DEPRECATION_ERROR")
-    final override fun encodeUnitElement(desc: SerialDescriptor, index: Int) = encodeTaggedUnit(desc.getTag(index))
-    final override fun encodeBooleanElement(descriptor: SerialDescriptor, index: Int, value: Boolean) = encodeTaggedBoolean(descriptor.getTag(index), value)
-    final override fun encodeByteElement(descriptor: SerialDescriptor, index: Int, value: Byte) = encodeTaggedByte(descriptor.getTag(index), value)
-    final override fun encodeShortElement(descriptor: SerialDescriptor, index: Int, value: Short) = encodeTaggedShort(descriptor.getTag(index), value)
-    final override fun encodeIntElement(descriptor: SerialDescriptor, index: Int, value: Int) = encodeTaggedInt(descriptor.getTag(index), value)
-    final override fun encodeLongElement(descriptor: SerialDescriptor, index: Int, value: Long) = encodeTaggedLong(descriptor.getTag(index), value)
-    final override fun encodeFloatElement(descriptor: SerialDescriptor, index: Int, value: Float) = encodeTaggedFloat(descriptor.getTag(index), value)
-    final override fun encodeDoubleElement(descriptor: SerialDescriptor, index: Int, value: Double) = encodeTaggedDouble(descriptor.getTag(index), value)
-    final override fun encodeCharElement(descriptor: SerialDescriptor, index: Int, value: Char) = encodeTaggedChar(descriptor.getTag(index), value)
-    final override fun encodeStringElement(descriptor: SerialDescriptor, index: Int, value: String) = encodeTaggedString(descriptor.getTag(index), value)
+    final override fun encodeUnitElement(descriptor: SerialDescriptor, index: Int) =
+        encodeTaggedUnit(descriptor.getTag(index))
 
-    final override fun <T : Any?> encodeSerializableElement(descriptor: SerialDescriptor, index: Int, serializer: SerializationStrategy<T>, value: T) {
+    final override fun encodeBooleanElement(descriptor: SerialDescriptor, index: Int, value: Boolean) =
+        encodeTaggedBoolean(descriptor.getTag(index), value)
+
+    final override fun encodeByteElement(descriptor: SerialDescriptor, index: Int, value: Byte) =
+        encodeTaggedByte(descriptor.getTag(index), value)
+
+    final override fun encodeShortElement(descriptor: SerialDescriptor, index: Int, value: Short) =
+        encodeTaggedShort(descriptor.getTag(index), value)
+
+    final override fun encodeIntElement(descriptor: SerialDescriptor, index: Int, value: Int) =
+        encodeTaggedInt(descriptor.getTag(index), value)
+
+    final override fun encodeLongElement(descriptor: SerialDescriptor, index: Int, value: Long) =
+        encodeTaggedLong(descriptor.getTag(index), value)
+
+    final override fun encodeFloatElement(descriptor: SerialDescriptor, index: Int, value: Float) =
+        encodeTaggedFloat(descriptor.getTag(index), value)
+
+    final override fun encodeDoubleElement(descriptor: SerialDescriptor, index: Int, value: Double) =
+        encodeTaggedDouble(descriptor.getTag(index), value)
+
+    final override fun encodeCharElement(descriptor: SerialDescriptor, index: Int, value: Char) =
+        encodeTaggedChar(descriptor.getTag(index), value)
+
+    final override fun encodeStringElement(descriptor: SerialDescriptor, index: Int, value: String) =
+        encodeTaggedString(descriptor.getTag(index), value)
+
+    final override fun <T : Any?> encodeSerializableElement(
+        descriptor: SerialDescriptor,
+        index: Int,
+        serializer: SerializationStrategy<T>,
+        value: T
+    ) {
         if (encodeElement(descriptor, index))
             encodeSerializableValue(serializer, value)
     }
 
-    final override fun <T : Any> encodeNullableSerializableElement(descriptor: SerialDescriptor, index: Int, serializer: SerializationStrategy<T>, value: T?) {
+    final override fun <T : Any> encodeNullableSerializableElement(
+        descriptor: SerialDescriptor,
+        index: Int,
+        serializer: SerializationStrategy<T>,
+        value: T?
+    ) {
         if (encodeElement(descriptor, index))
             encodeNullableSerializableValue(serializer, value)
     }
@@ -167,6 +202,9 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
     open fun decodeTaggedString(tag: Tag): String = decodeTaggedValue(tag) as String
     open fun decodeTaggedEnum(tag: Tag, enumDescription: SerialDescriptor): Int = decodeTaggedValue(tag) as Int
 
+    open fun <T : Any?> decodeSerializableValue(deserializer: DeserializationStrategy<T>, oldValue: T?): T =
+        decodeSerializableValue(deserializer)
+
 
     // ---- Implementation of low-level API ----
 
@@ -188,6 +226,9 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
 
     final override fun decodeEnum(enumDescriptor: SerialDescriptor): Int = decodeTaggedEnum(popTag(), enumDescriptor)
 
+    // do not update signature here because new signature is called by the plugin;
+    // and clients that have old signature would not be called.
+    @Suppress("OverridingDeprecatedMember")
     override fun beginStructure(descriptor: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder {
         return this
     }
@@ -198,28 +239,51 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
 
     @Deprecated(message = unitDeprecated, level = DeprecationLevel.ERROR)
     @Suppress("DEPRECATION_ERROR")
-    final override fun decodeUnitElement(desc: SerialDescriptor, index: Int) = decodeTaggedUnit(desc.getTag(index))
-    final override fun decodeBooleanElement(descriptor: SerialDescriptor, index: Int): Boolean = decodeTaggedBoolean(descriptor.getTag(index))
-    final override fun decodeByteElement(descriptor: SerialDescriptor, index: Int): Byte = decodeTaggedByte(descriptor.getTag(index))
-    final override fun decodeShortElement(descriptor: SerialDescriptor, index: Int): Short = decodeTaggedShort(descriptor.getTag(index))
-    final override fun decodeIntElement(descriptor: SerialDescriptor, index: Int): Int = decodeTaggedInt(descriptor.getTag(index))
-    final override fun decodeLongElement(descriptor: SerialDescriptor, index: Int): Long = decodeTaggedLong(descriptor.getTag(index))
-    final override fun decodeFloatElement(descriptor: SerialDescriptor, index: Int): Float = decodeTaggedFloat(descriptor.getTag(index))
-    final override fun decodeDoubleElement(descriptor: SerialDescriptor, index: Int): Double = decodeTaggedDouble(descriptor.getTag(index))
-    final override fun decodeCharElement(descriptor: SerialDescriptor, index: Int): Char = decodeTaggedChar(descriptor.getTag(index))
-    final override fun decodeStringElement(descriptor: SerialDescriptor, index: Int): String = decodeTaggedString(descriptor.getTag(index))
+    final override fun decodeUnitElement(descriptor: SerialDescriptor, index: Int) =
+        decodeTaggedUnit(descriptor.getTag(index))
 
-    final override fun <T : Any?> decodeSerializableElement(descriptor: SerialDescriptor, index: Int, deserializer: DeserializationStrategy<T>): T =
+    final override fun decodeBooleanElement(descriptor: SerialDescriptor, index: Int): Boolean =
+        decodeTaggedBoolean(descriptor.getTag(index))
+
+    final override fun decodeByteElement(descriptor: SerialDescriptor, index: Int): Byte =
+        decodeTaggedByte(descriptor.getTag(index))
+
+    final override fun decodeShortElement(descriptor: SerialDescriptor, index: Int): Short =
+        decodeTaggedShort(descriptor.getTag(index))
+
+    final override fun decodeIntElement(descriptor: SerialDescriptor, index: Int): Int =
+        decodeTaggedInt(descriptor.getTag(index))
+
+    final override fun decodeLongElement(descriptor: SerialDescriptor, index: Int): Long =
+        decodeTaggedLong(descriptor.getTag(index))
+
+    final override fun decodeFloatElement(descriptor: SerialDescriptor, index: Int): Float =
+        decodeTaggedFloat(descriptor.getTag(index))
+
+    final override fun decodeDoubleElement(descriptor: SerialDescriptor, index: Int): Double =
+        decodeTaggedDouble(descriptor.getTag(index))
+
+    final override fun decodeCharElement(descriptor: SerialDescriptor, index: Int): Char =
+        decodeTaggedChar(descriptor.getTag(index))
+
+    final override fun decodeStringElement(descriptor: SerialDescriptor, index: Int): String =
+        decodeTaggedString(descriptor.getTag(index))
+
+    final override fun <T : Any?> decodeSerializableElement(
+        descriptor: SerialDescriptor,
+        index: Int,
+        deserializer: DeserializationStrategy<T>,
+        oldValue: T?
+    ): T =
         tagBlock(descriptor.getTag(index)) { decodeSerializableValue(deserializer) }
 
-    final override fun <T : Any> decodeNullableSerializableElement(descriptor: SerialDescriptor, index: Int, deserializer: DeserializationStrategy<T?>): T? =
-        tagBlock(descriptor.getTag(index)) { decodeNullableSerializableValue(deserializer) }
-
-    override fun <T> updateSerializableElement(descriptor: SerialDescriptor, index: Int, deserializer: DeserializationStrategy<T>, old: T): T =
-        tagBlock(descriptor.getTag(index)) { updateSerializableValue(deserializer, old) }
-
-    override fun <T : Any> updateNullableSerializableElement(descriptor: SerialDescriptor, index: Int, deserializer: DeserializationStrategy<T?>, old: T?): T? =
-        tagBlock(descriptor.getTag(index)) { updateNullableSerializableValue(deserializer, old) }
+    final override fun <T : Any> decodeNullableSerializableElement(
+        descriptor: SerialDescriptor,
+        index: Int,
+        deserializer: DeserializationStrategy<T?>,
+        oldValue: T?
+    ): T? =
+        tagBlock(descriptor.getTag(index)) { if (decodeNotNullMark()) decodeSerializableValue(deserializer) else decodeNull() }
 
     private fun <E> tagBlock(tag: Tag, block: () -> E): E {
         pushTag(tag)
