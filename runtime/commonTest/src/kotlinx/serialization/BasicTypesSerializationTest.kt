@@ -8,7 +8,7 @@ import kotlinx.serialization.CompositeDecoder.Companion.READ_DONE
 import kotlin.test.*
 
 /*
- * Test ensures that type type that aggregate all basic (primitive/collection/maps/arrays)
+ * Test ensures that type that aggregate all basic (primitive/collection/maps/arrays)
  * types is properly serialized/deserialized with dummy format that supports only classes and primitives as
  * first-class citizens.
  */
@@ -96,7 +96,7 @@ class BasicTypesSerializationTest {
 
     // KeyValue Input/Output
     class KeyValueOutput(private val sb: StringBuilder) : ElementValueEncoder() {
-        override fun beginStructure(descriptor: SerialDescriptor, vararg typeSerializers: KSerializer<*>): CompositeEncoder {
+        override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
             sb.append('{')
             return this
         }
@@ -105,9 +105,9 @@ class BasicTypesSerializationTest {
             sb.append('}')
         }
 
-        override fun encodeElement(desc: SerialDescriptor, index: Int): Boolean {
+        override fun encodeElement(descriptor: SerialDescriptor, index: Int): Boolean {
             if (index > 0) sb.append(", ")
-            sb.append(desc.getElementName(index))
+            sb.append(descriptor.getElementName(index))
             sb.append(':')
             return true
         }
@@ -130,7 +130,7 @@ class BasicTypesSerializationTest {
     }
 
     class KeyValueInput(private val inp: Parser) : ElementValueDecoder() {
-        override fun beginStructure(desc: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder {
+        override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {
             inp.expectAfterWhiteSpace('{')
             return this
         }

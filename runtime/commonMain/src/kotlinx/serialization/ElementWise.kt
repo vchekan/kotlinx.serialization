@@ -13,6 +13,11 @@ abstract class ElementValueEncoder : Encoder, CompositeEncoder {
     // do not update signature here because new signature is called by the plugin;
     // and clients that have old signature would not be called.
     @Suppress("OverridingDeprecatedMember")
+    @Deprecated(
+        "Parameter typeSerializers is deprecated for removal. Please migrate to beginStructure method with one argument.",
+        ReplaceWith("beginStructure(descriptor)"),
+        DeprecationLevel.ERROR
+    )
     override fun beginStructure(
         descriptor: SerialDescriptor,
         vararg typeSerializers: KSerializer<*>
@@ -25,7 +30,7 @@ abstract class ElementValueEncoder : Encoder, CompositeEncoder {
      *
      * @return True if value should be encoded, false otherwise
      */
-    open fun encodeElement(desc: SerialDescriptor, index: Int): Boolean = true
+    open fun encodeElement(descriptor: SerialDescriptor, index: Int): Boolean = true
 
     open fun encodeValue(value: Any): Unit
             = throw SerializationException("Non-serializable ${value::class} is not supported by ${this::class} encoder")

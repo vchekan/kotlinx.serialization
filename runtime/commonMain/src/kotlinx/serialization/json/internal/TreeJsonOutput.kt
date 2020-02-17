@@ -1,14 +1,14 @@
 /*
- * Copyright 2017-2019 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2017-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
  */
 
 package kotlinx.serialization.json.internal
 
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
-import kotlinx.serialization.modules.SerialModule
+import kotlinx.serialization.modules.*
 import kotlin.collections.set
-import kotlin.jvm.JvmField
+import kotlin.jvm.*
 
 internal fun <T> Json.writeJson(value: T, serializer: SerializationStrategy<T>): JsonElement {
     lateinit var result: JsonElement
@@ -85,7 +85,7 @@ private sealed class AbstractJsonTreeOutput(
         putElement(tag, JsonLiteral(value.toString()))
     }
 
-    override fun beginStructure(descriptor: SerialDescriptor, vararg typeSerializers: KSerializer<*>): CompositeEncoder {
+    override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
         val consumer =
             if (currentTagOrNull == null) nodeConsumer
             else { node -> putElement(currentTag, node) }
@@ -108,7 +108,7 @@ private sealed class AbstractJsonTreeOutput(
         return encoder
     }
 
-    override fun endEncode(desc: SerialDescriptor) {
+    override fun endEncode(descriptor: SerialDescriptor) {
         nodeConsumer(getCurrent())
     }
 }

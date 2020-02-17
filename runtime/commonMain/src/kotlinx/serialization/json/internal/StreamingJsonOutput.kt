@@ -80,7 +80,7 @@ internal class StreamingJsonOutput(private val composer: Composer, override val 
         }
     }
 
-    override fun encodeElement(desc: SerialDescriptor, index: Int): Boolean {
+    override fun encodeElement(descriptor: SerialDescriptor, index: Int): Boolean {
         when (mode) {
             WriteMode.LIST -> {
                 if (!composer.writingFirst)
@@ -116,7 +116,7 @@ internal class StreamingJsonOutput(private val composer: Composer, override val 
                 if (!composer.writingFirst)
                     composer.print(COMMA)
                 composer.nextItem()
-                encodeString(desc.getElementName(index))
+                encodeString(descriptor.getElementName(index))
                 composer.print(COLON)
                 composer.space()
             }

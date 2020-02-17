@@ -195,24 +195,30 @@ class SerializeFlatTest() {
     class Out(private val name: String) : ElementValueEncoder() {
         var step = 0
 
-        override fun beginStructure(descriptor: SerialDescriptor, vararg typeSerializers: KSerializer<*>): CompositeEncoder {
+        override fun beginStructure(descriptor: SerialDescriptor): CompositeEncoder {
             checkDesc(name, descriptor)
             if (step == 0) step++ else fail("@$step: beginStructure($descriptor)")
             return this
         }
 
-        override fun encodeElement(desc: SerialDescriptor, index: Int): Boolean {
-            checkDesc(name, desc)
+        override fun encodeElement(descriptor: SerialDescriptor, index: Int): Boolean {
+            checkDesc(name, descriptor)
             when (step) {
-                1 -> if (index == 0) { step++; return true }
-                3 -> if (index == 1) { step++; return true }
+                1 -> if (index == 0) {
+                    step++; return true
+                }
+                3 -> if (index == 1) {
+                    step++; return true
+                }
             }
-            fail("@$step: encodeElement($desc, $index)")
+            fail("@$step: encodeElement($descriptor, $index)")
         }
 
         override fun encodeString(value: String) {
             when (step) {
-                2 -> if (value == "s1") { step++; return }
+                2 -> if (value == "s1") {
+                    step++; return
+                }
             }
             fail("@$step: encodeString($value)")
         }
@@ -237,9 +243,9 @@ class SerializeFlatTest() {
     class Inp(private val name: String) : ElementValueDecoder() {
         var step = 0
 
-        override fun beginStructure(desc: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder {
-            checkDesc(name, desc)
-            if (step == 0) step++ else fail("@$step: beginStructure($desc)")
+        override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {
+            checkDesc(name, descriptor)
+            if (step == 0) step++ else fail("@$step: beginStructure($descriptor)")
             return this
         }
 

@@ -81,6 +81,11 @@ abstract class TaggedEncoder<Tag : Any?> : Encoder, CompositeEncoder {
     // do not update signature here because new signature is called by the plugin;
     // and clients that have old signature would not be called.
     @Suppress("OverridingDeprecatedMember")
+    @Deprecated(
+        "Parameter typeSerializers is deprecated for removal. Please migrate to beginStructure method with one argument.",
+        ReplaceWith("beginStructure(descriptor)"),
+        DeprecationLevel.ERROR
+    )
     override fun beginStructure(
         descriptor: SerialDescriptor,
         vararg typeSerializers: KSerializer<*>
@@ -190,7 +195,7 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
     open fun decodeTaggedNull(tag: Tag): Nothing? = null
 
     @Deprecated(message = unitDeprecated, level = DeprecationLevel.ERROR)
-    open fun decodeTaggedUnit(tag: Tag): Unit = decodeTaggedValue(tag) as Unit
+    open fun decodeTaggedUnit(tag: Tag): Unit = UnitSerializer.deserialize(this)
     open fun decodeTaggedBoolean(tag: Tag): Boolean = decodeTaggedValue(tag) as Boolean
     open fun decodeTaggedByte(tag: Tag): Byte = decodeTaggedValue(tag) as Byte
     open fun decodeTaggedShort(tag: Tag): Short = decodeTaggedValue(tag) as Short
@@ -229,6 +234,11 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
     // do not update signature here because new signature is called by the plugin;
     // and clients that have old signature would not be called.
     @Suppress("OverridingDeprecatedMember")
+    @Deprecated(
+        "Parameter typeSerializers is deprecated for removal. Please migrate to beginStructure method with one argument.",
+        ReplaceWith("beginStructure(descriptor)"),
+        DeprecationLevel.ERROR
+    )
     override fun beginStructure(descriptor: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder {
         return this
     }

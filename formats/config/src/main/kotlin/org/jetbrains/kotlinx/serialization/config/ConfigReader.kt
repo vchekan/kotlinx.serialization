@@ -12,7 +12,7 @@ import kotlinx.serialization.modules.*
 private val SerialKind.listLike get() = this == StructureKind.LIST || this is PolymorphicKind
 private val SerialKind.objLike get() = this == StructureKind.CLASS || this == StructureKind.OBJECT
 
-class ConfigParser(context: SerialModule = EmptyModule): AbstractSerialFormat(context) {
+class ConfigParser(override val context: SerialModule = EmptyModule) : SerialFormat {
     @ImplicitReflectionSerializer
     inline fun <reified T : Any> parse(conf: Config): T = parse(conf, context.getContextualOrDefault(T::class))
 
@@ -41,8 +41,6 @@ class ConfigParser(context: SerialModule = EmptyModule): AbstractSerialFormat(co
         override fun decodeTaggedLong(tag: T): Long = getTaggedNumber(tag).toLong()
         override fun decodeTaggedFloat(tag: T): Float = getTaggedNumber(tag).toFloat()
         override fun decodeTaggedDouble(tag: T): Double = getTaggedNumber(tag).toDouble()
-
-        override fun decodeTaggedUnit(tag: T) = Unit
 
         override fun decodeTaggedChar(tag: T): Char {
             val s = validateAndCast<String>(tag, ConfigValueType.STRING)
@@ -89,7 +87,7 @@ class ConfigParser(context: SerialModule = EmptyModule): AbstractSerialFormat(co
             return !conf.getIsNull(tag)
         }
 
-        override fun beginStructure(descriptor: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder =
+        override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder =
             when {
                 descriptor.kind.listLike -> ListConfigReader(conf.getList(currentTag))
                 descriptor.kind.objLike -> if (ind > -1) ConfigReader(conf.getConfig(currentTag)) else this
@@ -101,7 +99,7 @@ class ConfigParser(context: SerialModule = EmptyModule): AbstractSerialFormat(co
     private inner class ListConfigReader(private val list: ConfigList) : ConfigConverter<Int>() {
         private var ind = -1
 
-        override fun beginStructure(descriptor: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder =
+        override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder =
             when {
                 descriptor.kind.listLike -> ListConfigReader(list[currentTag] as ConfigList)
                 descriptor.kind.objLike -> ConfigReader((list[currentTag] as ConfigObject).toConfig())
@@ -133,7 +131,7 @@ class ConfigParser(context: SerialModule = EmptyModule): AbstractSerialFormat(co
 
         private val indexSize = values.size * 2
 
-        override fun beginStructure(descriptor: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder =
+        override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder =
             when {
                 descriptor.kind.listLike -> ListConfigReader(values[currentTag / 2] as ConfigList)
                 descriptor.kind.objLike -> ConfigReader((values[currentTag / 2] as ConfigObject).toConfig())

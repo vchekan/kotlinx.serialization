@@ -6,8 +6,7 @@ package kotlinx.serialization
 
 import kotlinx.serialization.CompositeDecoder.Companion.READ_DONE
 import kotlinx.serialization.modules.*
-import kotlin.math.abs
-import kotlin.math.floor
+import kotlin.math.*
 
 /**
  * [https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER]
@@ -74,9 +73,9 @@ class DynamicObjectParser(override val context: SerialModule = EmptyModule) : Se
             return o != null
         }
 
-        override fun beginStructure(desc: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder {
+        override fun beginStructure(descriptor: SerialDescriptor): CompositeDecoder {
             val curObj = currentTagOrNull?.let { obj[it] } ?: obj
-            return when (desc.kind) {
+            return when (descriptor.kind) {
                 StructureKind.LIST -> DynamicListInput(curObj)
                 StructureKind.MAP -> DynamicMapInput(curObj)
                 else -> DynamicInput(curObj)
