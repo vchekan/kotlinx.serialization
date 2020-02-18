@@ -50,6 +50,13 @@ public interface JsonInput : Decoder, CompositeDecoder {
      * Decodes current input as [JsonElement]
      */
     public fun decodeJson(): JsonElement
+
+    // Class 'JsonInput' must override public open val updateMode: UpdateMode defined in kotlinx.serialization.Decoder
+    // because it inherits multiple interface methods of it
+    @Suppress("DEPRECATION")
+    @Deprecated(updateModeDeprecated, level = DeprecationLevel.HIDDEN)
+    override val updateMode: UpdateMode
+        get() = UpdateMode.OVERWRITE
 }
 
 internal fun Decoder.asJsonInput() = this as? JsonInput

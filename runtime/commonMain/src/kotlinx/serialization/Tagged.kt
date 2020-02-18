@@ -184,7 +184,7 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
 
     @Suppress("DEPRECATION")
     @Deprecated(updateModeDeprecated, level = DeprecationLevel.ERROR)
-    final override val updateMode: UpdateMode = UpdateMode.UPDATE
+    override val updateMode: UpdateMode = UpdateMode.OVERWRITE
 
     protected abstract fun SerialDescriptor.getTag(index: Int): Tag
 
