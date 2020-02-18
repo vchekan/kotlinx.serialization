@@ -1,13 +1,11 @@
 /*
- * Copyright 2017-2019 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2017-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
  */
 
 package kotlinx.serialization.json
 
-import kotlinx.serialization.UnstableDefault
-import kotlinx.serialization.UpdateMode
-import kotlin.jvm.JvmField
-import kotlin.jvm.JvmStatic
+import kotlinx.serialization.*
+import kotlin.jvm.*
 
 /**
  * The class responsible for JSON-specific customizable behaviour in [Json] format.
@@ -34,9 +32,8 @@ public data class JsonConfiguration @UnstableDefault constructor(
     @JvmField internal val prettyPrint: Boolean = false,
     @JvmField internal val indent: String = defaultIndent,
     @JvmField internal val useArrayPolymorphism: Boolean = false,
-    @JvmField internal val classDiscriminator: String = defaultDiscriminator,
-    @Deprecated(message = "Custom update modes are not fully supported", level = DeprecationLevel.WARNING)
-    @JvmField internal val updateMode: UpdateMode = UpdateMode.OVERWRITE) {
+    @JvmField internal val classDiscriminator: String = defaultDiscriminator
+) {
 
     init {
         if (useArrayPolymorphism) require(classDiscriminator == defaultDiscriminator) {

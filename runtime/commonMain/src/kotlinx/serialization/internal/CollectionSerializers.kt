@@ -23,8 +23,8 @@ sealed class AbstractCollectionSerializer<Element, Collection, Builder> : KSeria
 
     abstract override fun serialize(encoder: Encoder, value: Collection)
 
-    final override fun patch(decoder: Decoder, old: Collection): Collection {
-        val builder = old.toBuilder()
+    fun merge(decoder: Decoder, old: Collection?): Collection {
+        val builder = old?.toBuilder() ?: builder()
         val startIndex = builder.builderSize()
         val compositeDecoder = decoder.beginStructure(descriptor)
         if (compositeDecoder.decodeSequentially()) {
@@ -40,10 +40,7 @@ sealed class AbstractCollectionSerializer<Element, Collection, Builder> : KSeria
         return builder.toResult()
     }
 
-    override fun deserialize(decoder: Decoder): Collection {
-        val builder = builder()
-        return patch(decoder, builder.toResult())
-    }
+    override fun deserialize(decoder: Decoder): Collection = merge(decoder, null)
 
     private fun readSize(decoder: CompositeDecoder, builder: Builder): Int {
         val size = decoder.decodeCollectionSize(descriptor)
@@ -184,12 +181,7 @@ internal constructor(
         encoder.endStructure(descriptor)
     }
 
-    final override fun deserialize(decoder: Decoder): Array {
-        // here we use empty() instead of builder().toResult() in AbstractCollectionSerializer
-        // because, unlike with ArrayLists, transformation builder(initialSize) > array > builder
-        // requires additional allocations
-        return patch(decoder, empty())
-    }
+    final override fun deserialize(decoder: Decoder): Array = merge(decoder, null)
 }
 
 // todo: can be more efficient when array size is know in advance, this one always uses temporary ArrayList as builder

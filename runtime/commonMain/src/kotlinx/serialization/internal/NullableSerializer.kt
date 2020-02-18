@@ -28,18 +28,13 @@ public class NullableSerializer<T : Any>(private val serializer: KSerializer<T>)
         if (value != null) {
             encoder.encodeNotNullMark()
             encoder.encodeSerializableValue(serializer, value)
-        }
-        else {
+        } else {
             encoder.encodeNull()
         }
     }
 
     override fun deserialize(decoder: Decoder): T? {
         return if (decoder.decodeNotNullMark()) decoder.decodeSerializableValue(serializer) else decoder.decodeNull()
-    }
-
-    override fun patch(decoder: Decoder, old: T?): T? {
-        return deserialize(decoder)
     }
 
     override fun equals(other: Any?): Boolean {

@@ -182,7 +182,9 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
     override val context: SerialModule
         get() = EmptyModule
 
-    override val updateMode: UpdateMode = UpdateMode.UPDATE
+    @Suppress("DEPRECATION")
+    @Deprecated(updateModeDeprecated, level = DeprecationLevel.ERROR)
+    final override val updateMode: UpdateMode = UpdateMode.UPDATE
 
     protected abstract fun SerialDescriptor.getTag(index: Int): Tag
 
@@ -285,7 +287,7 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
         deserializer: DeserializationStrategy<T>,
         oldValue: T?
     ): T =
-        tagBlock(descriptor.getTag(index)) { decodeSerializableValue(deserializer) }
+        tagBlock(descriptor.getTag(index)) { decodeSerializableValue(deserializer, oldValue) }
 
     final override fun <T : Any> decodeNullableSerializableElement(
         descriptor: SerialDescriptor,
@@ -293,7 +295,12 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
         deserializer: DeserializationStrategy<T?>,
         oldValue: T?
     ): T? =
-        tagBlock(descriptor.getTag(index)) { if (decodeNotNullMark()) decodeSerializableValue(deserializer) else decodeNull() }
+        tagBlock(descriptor.getTag(index)) {
+            if (decodeNotNullMark()) decodeSerializableValue(
+                deserializer,
+                oldValue
+            ) else decodeNull()
+        }
 
     private fun <E> tagBlock(tag: Tag, block: () -> E): E {
         pushTag(tag)

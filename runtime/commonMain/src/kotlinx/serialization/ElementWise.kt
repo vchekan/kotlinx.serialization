@@ -125,7 +125,9 @@ abstract class ElementValueDecoder : Decoder, CompositeDecoder {
     override val context: SerialModule
         get() = EmptyModule
 
-    override val updateMode: UpdateMode = UpdateMode.OVERWRITE
+    @Suppress("DEPRECATION_ERROR")
+    @Deprecated(updateModeDeprecated, level = DeprecationLevel.ERROR)
+    final override val updateMode: UpdateMode = UpdateMode.OVERWRITE
     // ------- implementation API -------
 
     override fun decodeNotNullMark(): Boolean = true

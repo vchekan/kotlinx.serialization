@@ -5,7 +5,7 @@
 package kotlinx.serialization
 
 import kotlinx.serialization.CompositeDecoder.Companion.READ_DONE
-import kotlinx.serialization.test.isJs
+import kotlinx.serialization.test.*
 import kotlin.test.*
 
 class TaggedTest {
@@ -44,7 +44,6 @@ class TaggedTest {
     }
 
     @Test
-    @Ignore
     fun testTagged() {
         val collector = Collector()
         val data = DataWithId(1, "2")
