@@ -19,8 +19,6 @@ sealed class AbstractCollectionSerializer<Element, Collection, Builder> : KSeria
     protected abstract fun Collection.toBuilder(): Builder
     protected abstract fun Builder.checkCapacity(size: Int)
 
-    abstract val typeParams: Array<KSerializer<*>>
-
     abstract override fun serialize(encoder: Encoder, value: Collection)
 
     fun merge(decoder: Decoder, old: Collection?): Collection {
@@ -60,8 +58,6 @@ sealed class ListLikeSerializer<Element, Collection, Builder>(
     abstract fun Builder.insert(index: Int, element: Element)
     abstract override val descriptor: ListLikeDescriptor
 
-    final override val typeParams: Array<KSerializer<*>> = arrayOf(elementSerializer)
-
     override fun serialize(encoder: Encoder, value: Collection) {
         val size = value.collectionSize()
         @Suppress("NAME_SHADOWING")
@@ -90,8 +86,6 @@ sealed class MapLikeSerializer<Key, Value, Collection, Builder : MutableMap<Key,
 
     abstract fun Builder.insertKeyValuePair(index: Int, key: Key, value: Value)
     abstract override val descriptor: MapLikeDescriptor
-
-    final override val typeParams = arrayOf(keySerializer, valueSerializer)
 
     protected final override fun readAll(decoder: CompositeDecoder, builder: Builder, startIndex: Int, size: Int) {
         require(size >= 0) { "Size must be known in advance when using READ_ALL" }
