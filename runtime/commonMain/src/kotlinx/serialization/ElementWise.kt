@@ -155,7 +155,7 @@ abstract class ElementValueDecoder : Decoder, CompositeDecoder {
     // overwrite by default
     public open fun <T : Any?> decodeSerializableValue(
         deserializer: DeserializationStrategy<T>,
-        oldValue: T? = null
+        previousValue: T? = null
     ): T = decodeSerializableValue(deserializer)
 
     // Delegating implementation of CompositeEncoder
@@ -192,13 +192,13 @@ abstract class ElementValueDecoder : Decoder, CompositeDecoder {
         descriptor: SerialDescriptor,
         index: Int,
         deserializer: DeserializationStrategy<T>,
-        oldValue: T?
-    ): T = decodeSerializableValue(deserializer, oldValue)
+        previousValue: T?
+    ): T = decodeSerializableValue(deserializer, previousValue)
 
     final override fun <T : Any> decodeNullableSerializableElement(
         descriptor: SerialDescriptor,
         index: Int,
         deserializer: DeserializationStrategy<T?>,
-        oldValue: T?
-    ): T? = if (decodeNotNullMark()) decodeSerializableValue(deserializer, oldValue) else decodeNull()
+        previousValue: T?
+    ): T? = if (decodeNotNullMark()) decodeSerializableValue(deserializer, previousValue) else decodeNull()
 }

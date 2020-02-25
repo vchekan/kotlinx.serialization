@@ -209,7 +209,7 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
     open fun decodeTaggedString(tag: Tag): String = decodeTaggedValue(tag) as String
     open fun decodeTaggedEnum(tag: Tag, enumDescription: SerialDescriptor): Int = decodeTaggedValue(tag) as Int
 
-    open fun <T : Any?> decodeSerializableValue(deserializer: DeserializationStrategy<T>, oldValue: T?): T =
+    open fun <T : Any?> decodeSerializableValue(deserializer: DeserializationStrategy<T>, previousValue: T?): T =
         decodeSerializableValue(deserializer)
 
 
@@ -285,20 +285,20 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
         descriptor: SerialDescriptor,
         index: Int,
         deserializer: DeserializationStrategy<T>,
-        oldValue: T?
+        previousValue: T?
     ): T =
-        tagBlock(descriptor.getTag(index)) { decodeSerializableValue(deserializer, oldValue) }
+        tagBlock(descriptor.getTag(index)) { decodeSerializableValue(deserializer, previousValue) }
 
     final override fun <T : Any> decodeNullableSerializableElement(
         descriptor: SerialDescriptor,
         index: Int,
         deserializer: DeserializationStrategy<T?>,
-        oldValue: T?
+        previousValue: T?
     ): T? =
         tagBlock(descriptor.getTag(index)) {
             if (decodeNotNullMark()) decodeSerializableValue(
                 deserializer,
-                oldValue
+                previousValue
             ) else decodeNull()
         }
 
