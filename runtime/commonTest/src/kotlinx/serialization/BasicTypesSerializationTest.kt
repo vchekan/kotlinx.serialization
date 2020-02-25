@@ -105,9 +105,9 @@ class BasicTypesSerializationTest {
             sb.append('}')
         }
 
-        override fun encodeElement(desc: SerialDescriptor, index: Int): Boolean {
+        override fun encodeElement(descriptor: SerialDescriptor, index: Int): Boolean {
             if (index > 0) sb.append(", ")
-            sb.append(desc.getElementName(index))
+            sb.append(descriptor.getElementName(index))
             sb.append(':')
             return true
         }
@@ -130,7 +130,7 @@ class BasicTypesSerializationTest {
     }
 
     class KeyValueInput(private val inp: Parser) : ElementValueDecoder() {
-        override fun beginStructure(desc: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder {
+        override fun beginStructure(descriptor: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder {
             inp.expectAfterWhiteSpace('{')
             return this
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2017-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
  */
 
 package kotlinx.serialization
@@ -92,8 +92,11 @@ abstract class TaggedEncoder<Tag : Any?> : Encoder, CompositeEncoder {
     open fun endEncode(descriptor: SerialDescriptor) {}
 
     @Suppress("DEPRECATION_ERROR")
-    final override fun encodeUnitElement(desc: SerialDescriptor, index: Int) = encodeTaggedUnit(desc.getTag(index))
-    final override fun encodeBooleanElement(descriptor: SerialDescriptor, index: Int, value: Boolean) = encodeTaggedBoolean(descriptor.getTag(index), value)
+    final override fun encodeUnitElement(descriptor: SerialDescriptor, index: Int) =
+        encodeTaggedUnit(descriptor.getTag(index))
+
+    final override fun encodeBooleanElement(descriptor: SerialDescriptor, index: Int, value: Boolean) =
+        encodeTaggedBoolean(descriptor.getTag(index), value)
     final override fun encodeByteElement(descriptor: SerialDescriptor, index: Int, value: Byte) = encodeTaggedByte(descriptor.getTag(index), value)
     final override fun encodeShortElement(descriptor: SerialDescriptor, index: Int, value: Short) = encodeTaggedShort(descriptor.getTag(index), value)
     final override fun encodeIntElement(descriptor: SerialDescriptor, index: Int, value: Int) = encodeTaggedInt(descriptor.getTag(index), value)
@@ -197,8 +200,11 @@ abstract class TaggedDecoder<Tag : Any?> : Decoder, CompositeDecoder {
 
     @Deprecated(message = unitDeprecated, level = DeprecationLevel.ERROR)
     @Suppress("DEPRECATION_ERROR")
-    final override fun decodeUnitElement(desc: SerialDescriptor, index: Int) = decodeTaggedUnit(desc.getTag(index))
-    final override fun decodeBooleanElement(descriptor: SerialDescriptor, index: Int): Boolean = decodeTaggedBoolean(descriptor.getTag(index))
+    final override fun decodeUnitElement(descriptor: SerialDescriptor, index: Int) =
+        decodeTaggedUnit(descriptor.getTag(index))
+
+    final override fun decodeBooleanElement(descriptor: SerialDescriptor, index: Int): Boolean =
+        decodeTaggedBoolean(descriptor.getTag(index))
     final override fun decodeByteElement(descriptor: SerialDescriptor, index: Int): Byte = decodeTaggedByte(descriptor.getTag(index))
     final override fun decodeShortElement(descriptor: SerialDescriptor, index: Int): Short = decodeTaggedShort(descriptor.getTag(index))
     final override fun decodeIntElement(descriptor: SerialDescriptor, index: Int): Int = decodeTaggedInt(descriptor.getTag(index))

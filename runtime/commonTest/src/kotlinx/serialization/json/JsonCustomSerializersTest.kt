@@ -9,7 +9,7 @@ import kotlinx.serialization.*
 import kotlinx.serialization.modules.*
 import kotlin.test.*
 
-@UseExperimental(ImplicitReflectionSerializer::class)
+@OptIn(ImplicitReflectionSerializer::class)
 class JsonCustomSerializersTest : JsonTestBase() {
     
     @Serializable

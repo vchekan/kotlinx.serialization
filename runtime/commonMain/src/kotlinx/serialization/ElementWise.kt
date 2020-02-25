@@ -1,5 +1,5 @@
 /*
- * Copyright 2017-2019 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
+ * Copyright 2017-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
  */
 
 package kotlinx.serialization
@@ -19,7 +19,7 @@ abstract class ElementValueEncoder : Encoder, CompositeEncoder {
      *
      * @return True if value should be encoded, false otherwise
      */
-    open fun encodeElement(desc: SerialDescriptor, index: Int): Boolean = true
+    open fun encodeElement(descriptor: SerialDescriptor, index: Int): Boolean = true
 
     open fun encodeValue(value: Any): Unit
             = throw SerializationException("Non-serializable ${value::class} is not supported by ${this::class} encoder")
@@ -52,22 +52,60 @@ abstract class ElementValueEncoder : Encoder, CompositeEncoder {
             encodeUnit()
         }
     }
-    final override fun encodeBooleanElement(descriptor: SerialDescriptor, index: Int, value: Boolean) { if (encodeElement(descriptor, index)) encodeBoolean(value) }
-    final override fun encodeByteElement(descriptor: SerialDescriptor, index: Int, value: Byte) { if (encodeElement(descriptor, index)) encodeByte(value) }
-    final override fun encodeShortElement(descriptor: SerialDescriptor, index: Int, value: Short) { if (encodeElement(descriptor, index)) encodeShort(value) }
-    final override fun encodeIntElement(descriptor: SerialDescriptor, index: Int, value: Int) { if (encodeElement(descriptor, index)) encodeInt(value) }
-    final override fun encodeLongElement(descriptor: SerialDescriptor, index: Int, value: Long) { if (encodeElement(descriptor, index)) encodeLong(value) }
-    final override fun encodeFloatElement(descriptor: SerialDescriptor, index: Int, value: Float) { if (encodeElement(descriptor, index)) encodeFloat(value) }
-    final override fun encodeDoubleElement(descriptor: SerialDescriptor, index: Int, value: Double) { if (encodeElement(descriptor, index)) encodeDouble(value) }
-    final override fun encodeCharElement(descriptor: SerialDescriptor, index: Int, value: Char) { if (encodeElement(descriptor, index)) encodeChar(value) }
-    final override fun encodeStringElement(descriptor: SerialDescriptor, index: Int, value: String) { if (encodeElement(descriptor, index)) encodeString(value) }
 
-    final override fun <T : Any?> encodeSerializableElement(desc: SerialDescriptor, index: Int, serializer: SerializationStrategy<T>, value: T) {
-        if (encodeElement(desc, index))
+    final override fun encodeBooleanElement(descriptor: SerialDescriptor, index: Int, value: Boolean) {
+        if (encodeElement(descriptor, index)) encodeBoolean(value)
+    }
+
+    final override fun encodeByteElement(descriptor: SerialDescriptor, index: Int, value: Byte) {
+        if (encodeElement(descriptor, index)) encodeByte(value)
+    }
+
+    final override fun encodeShortElement(descriptor: SerialDescriptor, index: Int, value: Short) {
+        if (encodeElement(descriptor, index)) encodeShort(value)
+    }
+
+    final override fun encodeIntElement(descriptor: SerialDescriptor, index: Int, value: Int) {
+        if (encodeElement(descriptor, index)) encodeInt(value)
+    }
+
+    final override fun encodeLongElement(descriptor: SerialDescriptor, index: Int, value: Long) {
+        if (encodeElement(descriptor, index)) encodeLong(value)
+    }
+
+    final override fun encodeFloatElement(descriptor: SerialDescriptor, index: Int, value: Float) {
+        if (encodeElement(descriptor, index)) encodeFloat(value)
+    }
+
+    final override fun encodeDoubleElement(descriptor: SerialDescriptor, index: Int, value: Double) {
+        if (encodeElement(descriptor, index)) encodeDouble(value)
+    }
+
+    final override fun encodeCharElement(descriptor: SerialDescriptor, index: Int, value: Char) {
+        if (encodeElement(descriptor, index)) encodeChar(value)
+    }
+
+    final override fun encodeStringElement(descriptor: SerialDescriptor, index: Int, value: String) {
+        if (encodeElement(descriptor, index)) encodeString(value)
+    }
+
+    final override fun <T : Any?> encodeSerializableElement(
+        descriptor: SerialDescriptor,
+        index: Int,
+        serializer: SerializationStrategy<T>,
+        value: T
+    ) {
+        if (encodeElement(descriptor, index))
             encodeSerializableValue(serializer, value)
     }
-    final override fun <T : Any> encodeNullableSerializableElement(desc: SerialDescriptor, index: Int, serializer: SerializationStrategy<T>, value: T?) {
-        if (encodeElement(desc, index))
+
+    final override fun <T : Any> encodeNullableSerializableElement(
+        descriptor: SerialDescriptor,
+        index: Int,
+        serializer: SerializationStrategy<T>,
+        value: T?
+    ) {
+        if (encodeElement(descriptor, index))
             encodeNullableSerializableValue(serializer, value)
     }
 }
@@ -103,7 +141,7 @@ abstract class ElementValueDecoder : Decoder, CompositeDecoder {
 
     // Delegating implementation of CompositeEncoder
 
-    override fun beginStructure(desc: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder {
+    override fun beginStructure(descriptor: SerialDescriptor, vararg typeParams: KSerializer<*>): CompositeDecoder {
         return this
     }
 
@@ -112,23 +150,44 @@ abstract class ElementValueDecoder : Decoder, CompositeDecoder {
 
     @Deprecated(message = unitDeprecated, level = DeprecationLevel.ERROR)
     @Suppress("DEPRECATION_ERROR")
-    final override fun decodeUnitElement(desc: SerialDescriptor, index: Int) = decodeUnit()
+    final override fun decodeUnitElement(descriptor: SerialDescriptor, index: Int) = decodeUnit()
     final override fun decodeBooleanElement(descriptor: SerialDescriptor, index: Int): Boolean = decodeBoolean()
     final override fun decodeByteElement(descriptor: SerialDescriptor, index: Int): Byte = decodeByte()
     final override fun decodeShortElement(descriptor: SerialDescriptor, index: Int): Short = decodeShort()
-    final override fun decodeIntElement(desc: SerialDescriptor, index: Int): Int = decodeInt()
+    final override fun decodeIntElement(descriptor: SerialDescriptor, index: Int): Int = decodeInt()
     final override fun decodeLongElement(descriptor: SerialDescriptor, index: Int): Long = decodeLong()
     final override fun decodeFloatElement(descriptor: SerialDescriptor, index: Int): Float = decodeFloat()
-    final override fun decodeDoubleElement(desc: SerialDescriptor, index: Int): Double = decodeDouble()
+    final override fun decodeDoubleElement(descriptor: SerialDescriptor, index: Int): Double = decodeDouble()
     final override fun decodeCharElement(descriptor: SerialDescriptor, index: Int): Char = decodeChar()
     final override fun decodeStringElement(descriptor: SerialDescriptor, index: Int): String = decodeString()
 
-    final override fun <T: Any?> decodeSerializableElement(desc: SerialDescriptor, index: Int, deserializer: DeserializationStrategy<T>): T =
+    final override fun <T : Any?> decodeSerializableElement(
+        descriptor: SerialDescriptor,
+        index: Int,
+        deserializer: DeserializationStrategy<T>
+    ): T =
         decodeSerializableValue(deserializer)
-    final override fun <T: Any> decodeNullableSerializableElement(desc: SerialDescriptor, index: Int, deserializer: DeserializationStrategy<T?>): T? =
+
+    final override fun <T : Any> decodeNullableSerializableElement(
+        descriptor: SerialDescriptor,
+        index: Int,
+        deserializer: DeserializationStrategy<T?>
+    ): T? =
         decodeNullableSerializableValue(deserializer)
-    final override fun <T> updateSerializableElement(desc: SerialDescriptor, index: Int, deserializer: DeserializationStrategy<T>, old: T): T =
+
+    final override fun <T> updateSerializableElement(
+        descriptor: SerialDescriptor,
+        index: Int,
+        deserializer: DeserializationStrategy<T>,
+        old: T
+    ): T =
         updateSerializableValue(deserializer, old)
-    final override fun <T: Any> updateNullableSerializableElement(desc: SerialDescriptor, index: Int, deserializer: DeserializationStrategy<T?>, old: T?): T? =
+
+    final override fun <T : Any> updateNullableSerializableElement(
+        descriptor: SerialDescriptor,
+        index: Int,
+        deserializer: DeserializationStrategy<T?>,
+        old: T?
+    ): T? =
         updateNullableSerializableValue(deserializer, old)
 }
