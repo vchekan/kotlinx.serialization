@@ -228,8 +228,8 @@ public sealed class UnionKind : SerialKind() {
      * Effectively it defers the choice of the serializer to a moment of the serialization, and can
      * be used for [contextual][ContextualSerialization] serialization.
      *
-     *  To introspect descriptor of this kind correctly, one may need a [SerialModule].
-     * See [ContextAwareDescriptor] for more details.
+     * To introspect descriptor of this kind correctly, one may need a [SerialModule].
+     * See [capturedKClass] extension property for more details.
      */
     public object CONTEXTUAL : UnionKind()
 
@@ -266,7 +266,7 @@ public sealed class PolymorphicKind : UnionKind() {
      * serializers for a given base class or interface.
      *
      * To introspect descriptor of this kind (e.g. list possible subclasses) correctly, one may need a [SerialModule].
-     * See [ContextAwareDescriptor] for more details.
+     * See [capturedKClass] extension property for more details.
      */
     public object OPEN : PolymorphicKind()
 }

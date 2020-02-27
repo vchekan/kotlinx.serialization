@@ -82,7 +82,7 @@ class PolymorphicOnClassesTest {
     }
 
     private fun SerialDescriptor.inContext(module: SerialModule): List<SerialDescriptor> = when (kind) {
-        PolymorphicKind.OPEN -> module.getPolymorphicDescriptors(this as ContextAwareDescriptor)
+        PolymorphicKind.OPEN -> module.getPolymorphicDescriptors(this)
         else -> error("Expected this function to be called on OPEN descriptor")
     }
 
@@ -102,9 +102,9 @@ class PolymorphicOnClassesTest {
     @Test
     fun testDocSampleWithAllDistinct() {
         fun allDistinctNames(descriptor: SerialDescriptor, module: SerialModule) = when (descriptor.kind) {
-            is PolymorphicKind.OPEN -> module.getPolymorphicDescriptors(descriptor as ContextAwareDescriptor)
+            is PolymorphicKind.OPEN -> module.getPolymorphicDescriptors(descriptor)
                 .map { it.elementNames() }.flatten().toSet()
-            is UnionKind.CONTEXTUAL -> module.getContextualDescriptor(descriptor as ContextAwareDescriptor)
+            is UnionKind.CONTEXTUAL -> module.getContextualDescriptor(descriptor)
                 ?.elementNames().orEmpty().toSet()
             else -> descriptor.elementNames().toSet()
         }

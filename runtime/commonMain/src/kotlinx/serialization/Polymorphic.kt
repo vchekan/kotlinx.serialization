@@ -74,6 +74,6 @@ public val PolymorphicClassDescriptor: SerialDescriptor =
  * @see SerializersModuleBuilder.polymorphic
  */
 public class PolymorphicSerializer<T : Any>(override val baseClass: KClass<T>) : AbstractPolymorphicSerializer<T>() {
-    public override val descriptor: ContextAwareDescriptor =
+    public override val descriptor: SerialDescriptor =
         SerialDescriptor("kotlinx.serialization.Polymorphic", PolymorphicKind.OPEN).withContext(baseClass)
 }

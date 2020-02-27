@@ -66,24 +66,25 @@ public infix fun SerialModule.overwriteWith(other: SerialModule): SerialModule =
 
 /**
  * Looks up a descriptor of serializer registered for contextual serialization in [this],
- * using [ContextAwareDescriptor.kClass] of [descriptor] as a key.
+ * using [SerialDescriptor.capturedKClass] as a key.
  *
  * @see SerialModule.getContextual
  * @see SerializersModuleBuilder.contextual
  */
-public fun SerialModule.getContextualDescriptor(descriptor: ContextAwareDescriptor): SerialDescriptor? =
-    getContextual(descriptor.kClass)?.descriptor
+public fun SerialModule.getContextualDescriptor(descriptor: SerialDescriptor): SerialDescriptor? =
+    descriptor.capturedKClass?.let { klass -> getContextual(klass)?.descriptor }
 
 /**
  * Retrieves a collection of descriptors which serializers are registered for polymorphic serialization in [this]
- * with base class equal to [descriptor]'s [ContextAwareDescriptor.kClass].
+ * with base class equal to [descriptor]'s [SerialDescriptor.capturedKClass].
  *
  * @see SerialModule.getPolymorphic
  * @see SerializersModuleBuilder.polymorphic
  */
-public fun SerialModule.getPolymorphicDescriptors(descriptor: ContextAwareDescriptor): List<SerialDescriptor> {
+public fun SerialModule.getPolymorphicDescriptors(descriptor: SerialDescriptor): List<SerialDescriptor> {
+    val kClass = descriptor.capturedKClass ?: return emptyList()
     // shortcut
-    if (this is SerialModuleImpl) return this.polyBase2Serializers[descriptor.kClass]?.values.orEmpty()
+    if (this is SerialModuleImpl) return this.polyBase2Serializers[kClass]?.values.orEmpty()
         .map { it.descriptor }
 
     val builder = ArrayList<SerialDescriptor>()
@@ -96,7 +97,7 @@ public fun SerialModule.getPolymorphicDescriptors(descriptor: ContextAwareDescri
             actualClass: KClass<Sub>,
             actualSerializer: KSerializer<Sub>
         ) {
-            if (baseClass == descriptor.kClass) builder.add(actualSerializer.descriptor)
+            if (baseClass == kClass) builder.add(actualSerializer.descriptor)
         }
     })
     return builder

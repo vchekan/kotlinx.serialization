@@ -100,7 +100,7 @@ class ContextAndPolymorphicTest {
     }
 
     private fun SerialDescriptor.inContext(module: SerialModule): SerialDescriptor = when (kind) {
-        UnionKind.CONTEXTUAL -> requireNotNull(module.getContextualDescriptor(this as ContextAwareDescriptor)) { "Expected $this to be registered in module" }
+        UnionKind.CONTEXTUAL -> requireNotNull(module.getContextualDescriptor(this)) { "Expected $this to be registered in module" }
         else -> error("Expected this function to be called on CONTEXTUAL descriptor")
     }
 
