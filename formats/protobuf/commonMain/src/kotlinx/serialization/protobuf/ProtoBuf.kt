@@ -7,6 +7,7 @@ package kotlinx.serialization.protobuf
 import kotlinx.io.*
 import kotlinx.serialization.*
 import kotlinx.serialization.CompositeDecoder.Companion.READ_DONE
+import kotlinx.serialization.MapLikeSerializer
 import kotlinx.serialization.builtins.*
 import kotlinx.serialization.internal.*
 import kotlinx.serialization.modules.*
@@ -139,13 +140,16 @@ public class ProtoBuf(
         @Suppress("UNCHECKED_CAST", "NAME_SHADOWING")
         override fun <T> encodeSerializableValue(serializer: SerializationStrategy<T>, value: T) = when {
             // encode maps as collection of map entries, not merged collection of key-values
-            serializer is MapLikeSerializer<*, *, *, *> -> {
+            serializer is MapLikeSerializer<*, *, *> -> {
                 // TODO it probably requires some common interface exposure
-                val serializer = (serializer as MapLikeSerializer<Any?, Any?, T, *>)
+                val serializer = (serializer as MapLikeSerializer<T, Any?, Any?>)
                 val mapEntrySerial = MapEntrySerializer(serializer.keySerializer, serializer.valueSerializer)
-                SetSerializer(mapEntrySerial).serialize(this, (value as Map<*, *>).entries)
+                SetSerializer(mapEntrySerial).serialize(this, serializer.toMap(value).entries)
             }
-            serializer.descriptor == ByteArraySerializer().descriptor -> encoder.writeBytes(value as ByteArray, popTag().first)
+            serializer.descriptor == ByteArraySerializer().descriptor -> encoder.writeBytes(
+                value as ByteArray,
+                popTag().first
+            )
             else -> serializer.serialize(this, value)
         }
     }
@@ -281,8 +285,8 @@ public class ProtoBuf(
         @Suppress("UNCHECKED_CAST")
         override fun <T> decodeSerializableValue(deserializer: DeserializationStrategy<T>): T = when {
             // encode maps as collection of map entries, not merged collection of key-values
-            deserializer is MapLikeSerializer<*, *, *, *> -> {
-                val serializer = (deserializer as MapLikeSerializer<Any?, Any?, T, *>)
+            deserializer is MapLikeSerializer<*, *, *> -> {
+                val serializer = (deserializer as MapLikeSerializer<T, Any?, Any?>)
                 val mapEntrySerial = MapEntrySerializer(serializer.keySerializer, serializer.valueSerializer)
                 val setOfEntries = SetSerializer(mapEntrySerial).deserialize(this)
                 setOfEntries.associateBy({ it.key }, {it.value}) as T

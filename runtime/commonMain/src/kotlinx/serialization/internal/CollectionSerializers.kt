@@ -1,16 +1,16 @@
 /*
  * Copyright 2017-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
  */
-
+@file:Suppress("DEPRECATION_ERROR")
 package kotlinx.serialization.internal
 
 import kotlinx.serialization.*
 import kotlinx.serialization.CompositeDecoder.Companion.READ_DONE
-import kotlin.jvm.*
 import kotlin.reflect.*
 
 @InternalSerializationApi
-sealed class AbstractCollectionSerializer<Element, Collection, Builder> : KSerializer<Collection> {
+@Deprecated(level = DeprecationLevel.ERROR, message = "For internal use")
+public sealed class AbstractCollectionSerializer<Element, Collection, Builder> : KSerializer<Collection> {
     protected abstract fun Collection.collectionSize(): Int
     protected abstract fun Collection.collectionIterator(): Iterator<Element>
     protected abstract fun builder(): Builder
@@ -26,7 +26,7 @@ sealed class AbstractCollectionSerializer<Element, Collection, Builder> : KSeria
     final override fun patch(decoder: Decoder, old: Collection): Collection {
         val builder = old.toBuilder()
         val startIndex = builder.builderSize()
-        val compositeDecoder = decoder.beginStructure(descriptor, *typeParams)
+        val compositeDecoder = decoder.beginStructure(descriptor)
         if (compositeDecoder.decodeSequentially()) {
             readAll(compositeDecoder, builder, startIndex, readSize(compositeDecoder, builder))
         } else {
@@ -57,7 +57,8 @@ sealed class AbstractCollectionSerializer<Element, Collection, Builder> : KSeria
 }
 
 @InternalSerializationApi
-sealed class ListLikeSerializer<Element, Collection, Builder>(
+@Deprecated(level = DeprecationLevel.ERROR, message = "For internal use")
+public sealed class ListLikeSerializer<Element, Collection, Builder>(
     private val elementSerializer: KSerializer<Element>
 ) : AbstractCollectionSerializer<Element, Collection, Builder>() {
 
@@ -88,10 +89,12 @@ sealed class ListLikeSerializer<Element, Collection, Builder>(
 }
 
 @InternalSerializationApi
-sealed class MapLikeSerializer<Key, Value, Collection, Builder : MutableMap<Key, Value>>(
-    @JvmField val keySerializer: KSerializer<Key>,
-    @JvmField val valueSerializer: KSerializer<Value>
-) : AbstractCollectionSerializer<Map.Entry<Key, Value>, Collection, Builder>() {
+@Deprecated(level = DeprecationLevel.ERROR, message = "For internal use")
+public sealed class MapLikeSerializer<Key, Value, Collection, Builder : MutableMap<Key, Value>>(
+    final override val keySerializer: KSerializer<Key>,
+    final override val valueSerializer: KSerializer<Value>
+) : AbstractCollectionSerializer<Map.Entry<Key, Value>, Collection, Builder>(),
+    kotlinx.serialization.MapLikeSerializer<Collection, Key, Value> {
 
     abstract fun Builder.insertKeyValuePair(index: Int, key: Key, value: Value)
     abstract override val descriptor: SerialDescriptor
@@ -123,19 +126,19 @@ sealed class MapLikeSerializer<Key, Value, Collection, Builder : MutableMap<Key,
 
     override fun serialize(encoder: Encoder, value: Collection) {
         val size = value.collectionSize()
-        @Suppress("NAME_SHADOWING")
-        val encoder = encoder.beginCollection(descriptor, size, *typeParams)
+        val composite = encoder.beginCollection(descriptor, size, *typeParams)
         val iterator = value.collectionIterator()
         var index = 0
         iterator.forEach { (k, v) ->
-            encoder.encodeSerializableElement(descriptor, index++, keySerializer, k)
-            encoder.encodeSerializableElement(descriptor, index++, valueSerializer, v)
+            composite.encodeSerializableElement(descriptor, index++, keySerializer, k)
+            composite.encodeSerializableElement(descriptor, index++, valueSerializer, v)
         }
-        encoder.endStructure(descriptor)
+        composite.endStructure(descriptor)
     }
 }
 
 @InternalSerializationApi
+@Deprecated(level = DeprecationLevel.HIDDEN, message = "For internal use")
 public abstract class PrimitiveArrayBuilder<Array> internal constructor() {
     abstract val position: Int
     abstract fun ensureCapacity(requiredCapacity: Int = position + 1)
@@ -149,6 +152,7 @@ public abstract class PrimitiveArrayBuilder<Array> internal constructor() {
  * Use concrete serializers ([ByteArraySerializer], etc) instead.
  */
 @InternalSerializationApi
+@Deprecated(level = DeprecationLevel.HIDDEN, message = "For internal use")
 public abstract class PrimitiveArraySerializer<Element, Array, Builder
 : PrimitiveArrayBuilder<Array>> internal constructor(
     primitiveSerializer: KSerializer<Element>
@@ -199,9 +203,9 @@ public abstract class PrimitiveArraySerializer<Element, Array, Builder
 @Deprecated(
     message = "Deprecated in the favour of ArraySerializer() factory",
     level = DeprecationLevel.ERROR,
-    replaceWith = ReplaceWith("ArraySerializer(kClass, eSerializer)", imports = ["kotlinx.serialization.builtins.ArraySerializer"])
+    replaceWith = ReplaceWith("ArraySerializer(eSerializer)", imports = ["kotlinx.serialization.builtins.ArraySerializer"])
 )
-class ReferenceArraySerializer<ElementKlass : Any, Element : ElementKlass?>(
+public class ReferenceArraySerializer<ElementKlass : Any, Element : ElementKlass?>(
     private val kClass: KClass<ElementKlass>,
     eSerializer: KSerializer<Element>
 ) : ListLikeSerializer<Element, Array<Element>, ArrayList<Element>>(eSerializer) {
@@ -222,8 +226,12 @@ class ReferenceArraySerializer<ElementKlass : Any, Element : ElementKlass?>(
     }
 }
 
-@InternalSerializationApi // Use kotlinx.serialization.builtins.ListSerializer() instead
-class ArrayListSerializer<E>(element: KSerializer<E>) : ListLikeSerializer<E, List<E>, ArrayList<E>>(element) {
+@InternalSerializationApi
+@Deprecated(
+    level = DeprecationLevel.ERROR, message = "Use ListSerializer() instead",
+    replaceWith = ReplaceWith("ListSerializer(element)", imports = ["kotlinx.serialization.builtins.ListSerializer"])
+)
+public class ArrayListSerializer<E>(element: KSerializer<E>) : ListLikeSerializer<E, List<E>, ArrayList<E>>(element) {
     override val descriptor: SerialDescriptor = ArrayListClassDesc(element.descriptor)
     override fun List<E>.collectionSize(): Int = size
     override fun List<E>.collectionIterator(): Iterator<E> = iterator()
@@ -235,8 +243,12 @@ class ArrayListSerializer<E>(element: KSerializer<E>) : ListLikeSerializer<E, Li
     override fun ArrayList<E>.insert(index: Int, element: E) { add(index, element) }
 }
 
-@InternalSerializationApi // Use kotlinx.serialization.builtins.SetSerializer() instead
-class LinkedHashSetSerializer<E>(
+@InternalSerializationApi
+@Deprecated(
+    level = DeprecationLevel.ERROR, message = "Use SetSerializer() instead",
+    replaceWith = ReplaceWith("SetSerializer(eSerializer)", imports = ["kotlinx.serialization.builtins.SetSerializer"])
+)
+public class LinkedHashSetSerializer<E>(
     eSerializer: KSerializer<E>
 ) : ListLikeSerializer<E, Set<E>, LinkedHashSet<E>>(eSerializer) {
 
@@ -251,8 +263,12 @@ class LinkedHashSetSerializer<E>(
     override fun LinkedHashSet<E>.insert(index: Int, element: E) { add(element) }
 }
 
-@InternalSerializationApi // Use kotlinx.serialization.builtins.SetSerializer() instead
-class HashSetSerializer<E>(
+@InternalSerializationApi
+@Deprecated(
+    level = DeprecationLevel.ERROR, message = "Use SetSerializer() instead",
+    replaceWith = ReplaceWith("SetSerializer(eSerializer)", imports = ["kotlinx.serialization.builtins.SetSerializer"])
+)
+public class HashSetSerializer<E>(
     eSerializer: KSerializer<E>
 ) : ListLikeSerializer<E, Set<E>, HashSet<E>>(eSerializer) {
 
@@ -267,8 +283,12 @@ class HashSetSerializer<E>(
     override fun HashSet<E>.insert(index: Int, element: E) { add(element) }
 }
 
-@InternalSerializationApi // Use kotlinx.serialization.builtins.MapSerializer() instead
-class LinkedHashMapSerializer<K, V>(
+@InternalSerializationApi
+@Deprecated(
+    level = DeprecationLevel.ERROR, message = "Use MapSerializer() instead",
+    replaceWith = ReplaceWith("MapSerializer(kSerializer, vSerializer)", imports = ["kotlinx.serialization.builtins.MapSerializer"])
+)
+public class LinkedHashMapSerializer<K, V>(
     kSerializer: KSerializer<K>, vSerializer: KSerializer<V>
 ) : MapLikeSerializer<K, V, Map<K, V>, LinkedHashMap<K, V>>(kSerializer, vSerializer) {
 
@@ -281,10 +301,15 @@ class LinkedHashMapSerializer<K, V>(
     override fun Map<K, V>.toBuilder(): LinkedHashMap<K, V> = this as? LinkedHashMap<K, V> ?: LinkedHashMap(this)
     override fun LinkedHashMap<K, V>.checkCapacity(size: Int) {}
     override fun LinkedHashMap<K, V>.insertKeyValuePair(index: Int, key: K, value: V) = set(key, value)
+    override fun toMap(value: Map<K, V>): Map<K, V> = value
 }
 
-@InternalSerializationApi // Use kotlinx.serialization.builtins.MapSerializer() instead
-class HashMapSerializer<K, V>(
+@InternalSerializationApi
+@Deprecated(
+    level = DeprecationLevel.ERROR, message = "Use MapSerializer() instead",
+    replaceWith = ReplaceWith("MapSerializer(kSerializer, vSerializer)", imports = ["kotlinx.serialization.builtins.MapSerializer"])
+)
+public class HashMapSerializer<K, V>(
     kSerializer: KSerializer<K>, vSerializer: KSerializer<V>
 ) : MapLikeSerializer<K, V, Map<K, V>, HashMap<K, V>>(kSerializer, vSerializer) {
 
@@ -297,4 +322,5 @@ class HashMapSerializer<K, V>(
     override fun Map<K, V>.toBuilder(): HashMap<K, V> = this as? HashMap<K, V> ?: HashMap(this)
     override fun HashMap<K, V>.checkCapacity(size: Int) {}
     override fun HashMap<K, V>.insertKeyValuePair(index: Int, key: K, value: V) = set(key, value)
+    override fun toMap(value: Map<K, V>): Map<K, V> = value
 }

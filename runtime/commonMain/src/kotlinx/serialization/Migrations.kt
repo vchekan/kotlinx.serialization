@@ -1,7 +1,7 @@
 /*
  * Copyright 2017-2020 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license.
  */
-@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE", "UNUSED", "UNUSED_PARAMETER")
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE", "UNUSED", "UNUSED_PARAMETER", "DEPRECATION_ERROR")
 package kotlinx.serialization
 
 import kotlinx.serialization.builtins.*
@@ -71,3 +71,21 @@ typealias ElementValueEncoder = AbstractEncoder
     replaceWith = ReplaceWith("AbstractDecoder", imports = ["kotlinx.serialization.builtins.AbstractDecoder"])
 )
 typealias ElementValueDecoder = AbstractDecoder
+
+private const val message =
+    "Mapper was renamed to Properties to better reflect its semantics and extracted to separate artifact kotlinx-serialization-properties"
+
+@Deprecated(message = message, level = DeprecationLevel.ERROR, replaceWith = ReplaceWith("Properties"))
+public class Mapper()
+
+@SerialInfo
+@Target(AnnotationTarget.PROPERTY)
+@Deprecated(
+    message = "SerialId is renamed to ProtoId to better reflect its semantics and extracted to separate artifact kotlinx-serialization-protobuf",
+    level = DeprecationLevel.ERROR, replaceWith = ReplaceWith("ProtoId", imports = ["kotlinx.serialization.protobuf.ProtoId"])
+)
+annotation class SerialId @Deprecated(
+    message = "SerialId is renamed to ProtoId to better reflect its semantics and extracted to separate artifact kotlinx-serialization-protobuf",
+    level = DeprecationLevel.ERROR,
+    replaceWith = ReplaceWith("ProtoId(id)", imports = ["kotlinx.serialization.protobuf.ProtoId"])
+) constructor(val id: Int)
